@@ -1,3 +1,4 @@
+import json
 import os
 from googleapiclient.discovery import build
 
@@ -10,30 +11,24 @@ youtube = build('youtube', 'v3', developerKey=api_key)
 
 class Channel:
     """Класс для ютуб-канала"""
+    __API_KEY: str = os.getenv('YT_API_KEY')
+    service = build('youtube', 'v3', developerKey=__API_KEY)
 
     def __init__(self, channel_id: str) -> None:
         """Экземпляр инициализируется id канала. Дальше все данные будут подтягиваться по API."""
         self.channel_id = channel_id
+        self._init_from_api()
+
+    def _init_from_api(self) -> None:
+        self.channel = self.service.channels().list(id=self.channel_id, part='snippet,statistics').execute()
+
+        self.title = self.channel['items'][0]['snippet']['title']
+        self.description = self.channel['items'][0]['snippet']['description']
+        self.url = f'https://www.youtube.com/channel/{self.channel["items"][0]["id"]}'
+        self.subscriber_count = self.channel['items'][0]['statistics']['subscriberCount']
+        self.video_count = self.channel['items'][0]['statistics']['videoCount']
+        self.view_count = self.channel['items'][0]['statistics']['viewCount']
 
     def print_info(self) -> None:
         """Выводит в консоль информацию о канале."""
-        # Получение данных о канале
-        channel_info = youtube.channels().list(id=self.channel_id, part='snippet,statistics').execute()
-        channel_data = channel_info.get('items', [])[0]
-
-        if channel_data:
-            # Извлечение нужных данных
-            channel_title = channel_data['snippet']['title']
-            description = channel_data['snippet']['description']
-            view_count = channel_data['statistics']['viewCount']
-            subscriber_count = channel_data['statistics']['subscriberCount']
-            video_count = channel_data['statistics']['videoCount']
-
-            # Вывод информации
-            print(f"Название канала: {channel_title}")
-            print(f"Описание: {description}")
-            print(f"Количество просмотров: {view_count}")
-            print(f"Количество подписчиков: {subscriber_count}")
-            print(f"Количество видео: {video_count}")
-        else:
-            print("Канал с указанным ID не найден.")
+        print(json.dumps(self.channel, indent=2, ensure_ascii=False))
