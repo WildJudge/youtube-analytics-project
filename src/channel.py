@@ -16,6 +16,50 @@ class Channel:
         self.channel_id = channel_id
         self._init_from_api()
 
+    def __str__(self):
+        """Возвращает строковое представление канала в формате "<название_канала> (<ссылка_на_канал>)"."""
+        return f"{self.title} ({self.url})"
+
+    def __add__(self, other):
+        """Выполняет сложение двух каналов по количеству подписчиков"""
+        return int(self.subscriber_count) + int(other.subscriber_count)
+
+    def __sub__(self, other):
+        """Выполняет вычитание двух каналов по количеству подписчиков"""
+        return int(self.subscriber_count) - int(other.subscriber_count)
+
+    def __eq__(self, other):
+        """Сравнивает два канала по количеству подписчиков и возвращает True, если они равны, иначе False"""
+        return int(self.subscriber_count) == int(other.subscriber_count)
+
+    def __lt__(self, other):
+        """
+        Сравнивает два канала по количеству подписчиков и возвращает True,
+        если текущий канал имеет меньше подписчиков, иначе False
+        """
+        return int(self.subscriber_count) < int(other.subscriber_count)
+
+    def __le__(self, other):
+        """
+        Сравнивает два канала по количеству подписчиков и возвращает True,
+        если текущий канал имеет меньше или равно подписчиков, иначе False
+        """
+        return int(self.subscriber_count) <= int(other.subscriber_count)
+
+    def __gt__(self, other):
+        """
+        Сравнивает два канала по количеству подписчиков и возвращает True,
+        если текущий канал имеет больше подписчиков, иначе False
+        """
+        return int(self.subscriber_count) > int(other.subscriber_count)
+
+    def __ge__(self, other):
+        """
+        Сравнивает два канала по количеству подписчиков и возвращает True,
+        если текущий канал имеет больше или равно подписчиков, иначе False
+        """
+        return int(self.subscriber_count) >= int(other.subscriber_count)
+
     def _init_from_api(self) -> None:
         channel_info = self.service.channels().list(id=self.channel_id, part='snippet,statistics').execute()
         channel_info = channel_info['items'][0]
