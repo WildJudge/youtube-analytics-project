@@ -37,11 +37,3 @@ class PLVideo(Video):
         """Инициализация видео с указанием ID видео и ID плейлиста"""
         super().__init__(video_id)
         self.playlist_id = playlist_id
-
-    def __str__(self):
-        """Возвращает строковое представление видео в формате "<название_видео>"."""
-        return f"{self.title}"
-
-    def _init_from_api(self) -> None:
-        super()._init_from_api()  # Используем родительский метод для инициализации базовых данных
-        self.like_count = None  # При работе с видео в плейлисте, лайки могут быть недоступны
