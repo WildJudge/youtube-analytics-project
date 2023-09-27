@@ -1,5 +1,6 @@
 import os
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 import datetime
 
 # YT_API_KEY скопирован из гугла и вставлен в переменные окружения
@@ -21,14 +22,27 @@ class Video:
         return f"{self.title}"
 
     def _init_from_api(self) -> None:
-        video_info = self.service.videos().list(id=self.video_id, part='snippet,statistics').execute()
-        video_info = video_info['items'][0]
+        try:
+            video_info = self.service.videos().list(id=self.video_id, part='snippet,statistics').execute()
+            items = video_info.get('items', [])
 
-        self.id = video_info['id']
-        self.title = video_info['snippet']['title']
-        self.url = f'https://www.youtube.com/watch?v={self.id}'
-        self.view_count = video_info['statistics']['viewCount']
-        self.like_count = video_info['statistics']['likeCount']
+            if items:
+                video_info = items[0]
+
+                self.id = video_info['id']
+                self.title = video_info['snippet']['title']
+                self.url = f'https://www.youtube.com/watch?v={self.id}'
+                self.view_count = video_info['statistics']['viewCount']
+                self.like_count = video_info['statistics']['likeCount']
+            else:
+                # Если в ответе нет элементов, устанавливаем атрибуты в None
+                self.id = None
+                self.title = None
+                self.url = None
+                self.view_count = None
+                self.like_count = None
+        except HttpError as e:
+            print(f'Произошла ошибка при получении данных из YouTube API: {str(e)}')
 
 
 class PLVideo(Video):
